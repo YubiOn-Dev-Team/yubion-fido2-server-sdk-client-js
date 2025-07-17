@@ -1,9 +1,3 @@
-import {
-	PublicKeyCredentialCreationOptionsJSON,
-	PublicKeyCredentialJSON,
-	PublicKeyCredentialRequestOptionsJSON
-} from "./types";
-
 /**
  * Converts a JSON-friendly `PublicKeyCredentialCreationOptions` object into the
  * format expected by the `navigator.credentials.create()` method by decoding
