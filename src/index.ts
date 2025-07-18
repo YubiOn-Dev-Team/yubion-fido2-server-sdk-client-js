@@ -6,6 +6,9 @@
  * @returns The binary-compatible creation options.
  */
 export function convertCreationOptionsToBinary(creationOptionsJson : PublicKeyCredentialCreationOptionsJSON) : PublicKeyCredentialCreationOptions {
+	if(PublicKeyCredential.parseCreationOptionsFromJSON){
+		return PublicKeyCredential.parseCreationOptionsFromJSON(creationOptionsJson);
+	}
 	return {
 		challenge : base64UrlDecode(creationOptionsJson.challenge),
 		pubKeyCredParams : creationOptionsJson.pubKeyCredParams,
@@ -38,6 +41,9 @@ export function convertCreationOptionsToBinary(creationOptionsJson : PublicKeyCr
  * @returns A JSON-serializable representation of the credential.
  */
 export function convertPublicKeyCredentialToJsonable(pubKeyCred : PublicKeyCredential) : PublicKeyCredentialJSON {
+	if(pubKeyCred instanceof PublicKeyCredential && pubKeyCred.toJSON){
+		return pubKeyCred.toJSON();
+	}
 	return arrayBufToBase64url(pubKeyCred);
 }
 
@@ -49,6 +55,9 @@ export function convertPublicKeyCredentialToJsonable(pubKeyCred : PublicKeyCrede
  * @returns The binary-compatible request options.
  */
 export function convertRequestOptionsToBinary(requestOptionsJson : PublicKeyCredentialRequestOptionsJSON) : PublicKeyCredentialRequestOptions {
+	if(PublicKeyCredential.parseRequestOptionsFromJSON){
+		return PublicKeyCredential.parseRequestOptionsFromJSON(requestOptionsJson);
+	}
 	return {
 		challenge : base64UrlDecode(requestOptionsJson.challenge),
 		allowCredentials : requestOptionsJson.allowCredentials ? requestOptionsJson.allowCredentials.map((x) => ({
@@ -81,20 +90,36 @@ const arrayBufToBase64url = function(data : any) : any {
 	if (data instanceof ArrayBuffer || data instanceof Uint8Array) {
 		return base64UrlEncode(data);
 	}
+	if (data instanceof PublicKeyCredential) {
+		const obj: { [key: string]: any } = {};
 
+		obj.id = data.id;
+		obj.rawId = base64UrlEncode(data.rawId);
+		obj.type = data.type;
+		if (data.response instanceof AuthenticatorAssertionResponse) {
+			obj.clientDataJSON = base64UrlEncode(data.response.clientDataJSON);
+			obj.authenticatorData = base64UrlEncode(data.response.authenticatorData);
+			obj.signature = base64UrlEncode(data.response.signature);
+			if (data.response.userHandle) {
+				obj.userHandle = base64UrlEncode(data.response.userHandle);
+			}
+		} else if (data.response instanceof AuthenticatorAttestationResponse) {
+			obj.attestationObject = base64UrlEncode(data.response.attestationObject);
+			obj.clientDataJSON = base64UrlEncode(data.response.clientDataJSON);
+		}
+		const clientExtensionResults = data.getClientExtensionResults();
+		if (clientExtensionResults) {
+			obj.clientExtensionResults = arrayBufToBase64url(clientExtensionResults);
+		}
+		if ('authenticatorAttachment' in data && data.authenticatorAttachment) {
+			obj.authenticatorAttachment = data.authenticatorAttachment;
+		}
+		return obj;
+	}
 	if (data instanceof Object) {
 		let obj : { [key : string] : any }= {};
-		let keys = Object.keys(data);
-		let passOwnPropCheck = false;
-		if(!keys || keys.length == 0){
-			if(data.toJSON){
-				keys = Object.keys(data.toJSON());
-				passOwnPropCheck = true;
-			}
-		}
-
-		for (let key of keys) {
-			if (passOwnPropCheck || Object.prototype.hasOwnProperty.call(data, key)) {
+		for (let key in data) {
+			if (Object.prototype.hasOwnProperty.call(data, key)) {
 				obj[key] = arrayBufToBase64url(data[key]);
 			}
 		}
