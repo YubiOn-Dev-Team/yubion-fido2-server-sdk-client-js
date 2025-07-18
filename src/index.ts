@@ -96,16 +96,17 @@ const arrayBufToBase64url = function(data : any) : any {
 		obj.id = data.id;
 		obj.rawId = base64UrlEncode(data.rawId);
 		obj.type = data.type;
+		obj.response = {};
 		if (data.response instanceof AuthenticatorAssertionResponse) {
-			obj.clientDataJSON = base64UrlEncode(data.response.clientDataJSON);
-			obj.authenticatorData = base64UrlEncode(data.response.authenticatorData);
-			obj.signature = base64UrlEncode(data.response.signature);
+			obj.response.clientDataJSON = base64UrlEncode(data.response.clientDataJSON);
+			obj.response.authenticatorData = base64UrlEncode(data.response.authenticatorData);
+			obj.response.signature = base64UrlEncode(data.response.signature);
 			if (data.response.userHandle) {
-				obj.userHandle = base64UrlEncode(data.response.userHandle);
+				obj.response.userHandle = base64UrlEncode(data.response.userHandle);
 			}
 		} else if (data.response instanceof AuthenticatorAttestationResponse) {
-			obj.attestationObject = base64UrlEncode(data.response.attestationObject);
-			obj.clientDataJSON = base64UrlEncode(data.response.clientDataJSON);
+			obj.response.attestationObject = base64UrlEncode(data.response.attestationObject);
+			obj.response.clientDataJSON = base64UrlEncode(data.response.clientDataJSON);
 		}
 		const clientExtensionResults = data.getClientExtensionResults();
 		if (clientExtensionResults) {
