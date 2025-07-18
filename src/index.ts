@@ -85,14 +85,16 @@ const arrayBufToBase64url = function(data : any) : any {
 	if (data instanceof Object) {
 		let obj : { [key : string] : any }= {};
 		let keys = Object.keys(data);
+		let passOwnPropCheck = false;
 		if(!keys || keys.length == 0){
 			if(data.toJSON){
 				keys = Object.keys(data.toJSON());
+				passOwnPropCheck = true;
 			}
 		}
 
 		for (let key of keys) {
-			if (Object.prototype.hasOwnProperty.call(data, key)) {
+			if (passOwnPropCheck || Object.prototype.hasOwnProperty.call(data, key)) {
 				obj[key] = arrayBufToBase64url(data[key]);
 			}
 		}
