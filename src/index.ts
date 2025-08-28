@@ -28,7 +28,7 @@ export function convertCreationOptionsToBinary(creationOptionsJson : PublicKeyCr
 			type : x.type as "public-key",
 			transports : x.transports as AuthenticatorTransport[],
 		})),
-		extensions : creationOptionsJson.extensions,
+		extensions : creationOptionsJson.extensions as any,
 		timeout : creationOptionsJson.timeout,
 	};
 }
@@ -68,7 +68,7 @@ export function convertRequestOptionsToBinary(requestOptionsJson : PublicKeyCred
 		rpId : requestOptionsJson.rpId,
 		timeout : requestOptionsJson.timeout,
 		userVerification : requestOptionsJson.userVerification as UserVerificationRequirement | undefined,
-		extensions : requestOptionsJson.extensions,
+		extensions : requestOptionsJson.extensions as any,
 	};
 }
 
@@ -150,7 +150,7 @@ function base64UrlDecode(encodedData : string) : ArrayBuffer {
  * @param data The ArrayBuffer to encode.
  * @returns The Base64URL-encoded string.
  */
-function base64UrlEncode(data : ArrayBuffer) : string {
+function base64UrlEncode(data : ArrayBuffer | Uint8Array) : string {
 	const bytes = new Uint8Array(data);
 	let binary = '';
 	for (let i = 0; i < bytes.byteLength; i++) {
